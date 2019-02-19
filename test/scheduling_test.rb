@@ -23,18 +23,18 @@ class ExamityClient::SchedulingTest < Minitest::Test
   def test_scheduling_exam
     client.get_token
     appointment = client.schedule(user, course, exam)
-    puts(ap(appointment))
+    assert_equal "scheduled",  appointment.status
   end
 
   def test_rescheduling_exam
     client.get_token
     appointment = client.reschedule(1, course, exam)
-    puts(ap(appointment))
+    assert_equal "rescheduled",  appointment.status
   end
 
   def test_canceling_exam
     client.get_token
     appointment = client.cancel(1)
-    puts(ap(appointment))
+    assert_equal "canceled",  appointment.status
   end
 end

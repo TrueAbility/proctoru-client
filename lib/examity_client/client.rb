@@ -320,8 +320,8 @@ class ExamityClient::Client
   def logger(message)
     unless @logger
       begin
-        @logger = Rails.logger
-      rescue NoMethodError
+        @logger = ::Rails.logger
+      rescue NoMethodError, NameError
         @logger = Logger.new(STDERR)
         @logger.warn "No rails logger, using standalone"
       end
