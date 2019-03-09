@@ -13,6 +13,7 @@ class ExamityClient::Client
   # GET
   def timezones
     begin
+      retries ||= 0
       url = config.base_url + "/examity/api/timezone"
       retries ||= 0
       json = JSON.parse(RestClient.get(url,
@@ -20,6 +21,7 @@ class ExamityClient::Client
                                          authorization: token,
                                          content_type: "application/json"
                                        }))
+
       json["timezoneInfo"]
     rescue RestClient::Unauthorized => e
       get_token
@@ -34,13 +36,14 @@ class ExamityClient::Client
   # POST
   def examtimes(user, time_zone_id, exam_date)
     begin
+      retries ||= 0
       url = config.base_url + "/examity/api/examtimes"
       body = {
         userId: user.id,
         timeZone: time_zone_id,
         examDate: exam_date
       }
-      retries ||= 0
+
       json = JSON.parse(RestClient.post(url,
                                         body.to_json,
                                         {
@@ -275,12 +278,13 @@ class ExamityClient::Client
 
   # POST
   def get_token
-    url = config.base_url + "/examity/api/token"
-    body = {
-      clientID: config.client_id,
-      secretKey: config.secret_key
-    }
     begin
+      url = config.base_url + "/examity/api/token"
+      body = {
+        clientID: config.client_id,
+        secretKey: config.secret_key
+      }
+
       json = JSON.parse(RestClient.post(url,
                                         body.to_json,
                                         {
@@ -298,6 +302,7 @@ class ExamityClient::Client
   # GET
   def user_profile(user)
     begin
+      retries ||= 0
       url = config.base_url + "/examity/api/user/#{user.id}/profile"
       json = JSON.parse(RestClient.get(url,
                                        {
