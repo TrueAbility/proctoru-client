@@ -278,6 +278,10 @@ class ExamityClient::Client
 
   # POST
   def get_token
+    raise ArgumentError.new("Please provide base_url") unless config.base_url
+    raise ArgumentError.new("Please provide client_id") unless config.client_id
+    raise ArgumentError.new("Please provide secret_key") unless config.secret_key
+
     begin
       url = config.base_url + "/examity/api/token"
       body = {
