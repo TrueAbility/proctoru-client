@@ -5,7 +5,7 @@ class ExamityClient::SsoTokenTest < Minitest::Test
   attr_accessor :client
   def setup
     config = ExamityClient::Configuration.new(
-      encryption_key: 'testtesttest',
+      encryption_key: 'testtesttesttest',
       client_id: "my client id",
       secret_key: "my secret",
     )
@@ -14,7 +14,7 @@ class ExamityClient::SsoTokenTest < Minitest::Test
 
   def test_can_generate_sso_token
     token = client.sso_token('user@example.com')
-    assert_equal "sKKHQtpZX9sqv5wuN88t74f5a+XTn+gg3TQ00BLU2c4=", token
+    assert_equal "Xgc+7jn/WDAEfo4kzW8ON2CL/v2yRvyiaI+wjrnLOvc=", token
   end
 
 end

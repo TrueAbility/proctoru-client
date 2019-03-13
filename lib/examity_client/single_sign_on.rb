@@ -6,15 +6,13 @@ class ExamityClient::SingleSignOn
   ALG = "AES-128-CBC"
 
   # this token is used FOR SSO
-  def self.token(encryption_key, email)
+  def self.token(key, email)
     digest = Digest::SHA1.new
-    digest.update(encryption_key)
-    key = digest.digest
+    digest.update(key)
 
     key = key.byteslice(0, 16) # must be 16 bytes
-
     key64 = Base64.strict_encode64(key)
-    # key64 = [key].pack("m")
+
     aes = OpenSSL::Cipher.new(ALG)
     aes.encrypt
     aes.key = key
@@ -23,7 +21,7 @@ class ExamityClient::SingleSignOn
     cipher = aes.update(email)
     cipher << aes.final
     cipher64 = Base64.strict_encode64(cipher)
-    # cipher64 = [cipher].pack('m')
+
     cipher64
   end
 end
