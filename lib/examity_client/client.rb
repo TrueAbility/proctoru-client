@@ -1,5 +1,5 @@
 require "logger"
-class ExamityClient::Client
+class ExamityClient::Client < ExamityClient::Base
   attr_accessor :config, :token
 
   def initialize(config = ExamityClient.configuration)
@@ -8,6 +8,11 @@ class ExamityClient::Client
 
   def configure
     yield config
+  end
+
+  # pass through for sso token
+  def sso_token(email)
+    ExamityCient::SingleSignOn::token(config.encryption_key, email)
   end
 
   # GET
@@ -21,6 +26,8 @@ class ExamityClient::Client
                                          authorization: token,
                                          content_type: "application/json"
                                        }))
+
+      check_response_code_for_error(json["statusCode"])
 
       json["timezoneInfo"]
     rescue RestClient::Unauthorized => e
@@ -50,6 +57,9 @@ class ExamityClient::Client
                                           authorization: token,
                                           content_type: "application/json"
                                         }))
+
+      check_response_code_for_error(json["statusCode"])
+
       json["timeInfo"]
     rescue RestClient::Unauthorized => e
       get_token
@@ -95,6 +105,9 @@ class ExamityClient::Client
                                           authorization: token,
                                           content_type: "application/json"
                                         }))
+
+      check_response_code_for_error(json["statusCode"])
+
       appt_info = json["appointmentInfo"]
       Appointment.from_examity_api(appt_info)
     rescue RestClient::Unauthorized => e
@@ -137,6 +150,9 @@ class ExamityClient::Client
                                          authorization: token,
                                          content_type: "application/json"
                                        }))
+
+      check_response_code_for_error(json["statusCode"])
+
       appt_info = json["appointmentInfo"]
       Appointment.from_examity_api(appt_info)
     rescue RestClient::Unauthorized => e
@@ -159,6 +175,9 @@ class ExamityClient::Client
                                             authorization: token,
                                             content_type: "application/json"
                                           }))
+
+      check_response_code_for_error(json["statusCode"])
+
       appt_info = json["appointmentInfo"]
       Appointment.from_examity_api(appt_info)
     rescue RestClient::Unauthorized => e
@@ -182,6 +201,9 @@ class ExamityClient::Client
                                          authorization: token,
                                          content_type: "application/json"
                                        }))
+
+      check_response_code_for_error(json["statusCode"])
+
       page_info = json["appointmentStatusInfo"]
       user_info = json["appointmentStatusInfo"]["userInfo"]
       exams_info = json["examInfo"]
@@ -193,6 +215,7 @@ class ExamityClient::Client
       @exams = exams_info.collect do |j|
         Appointment.from_examity_api(j)
       end
+
       return {user: @user, exams: @exams, pagination: @pagination}
     rescue RestClient::Unauthorized => e
       get_token
@@ -214,6 +237,9 @@ class ExamityClient::Client
                                          authorization: token,
                                          content_type: "application/json"
                                        }))
+
+      check_response_code_for_error(json["statusCode"])
+
       page_info = json["PaggedExamstatusInfo"]
       exams_info = json["PaggedExamstatusInfo"]["appointmentStatus"]
       @pagination = {
@@ -256,6 +282,9 @@ class ExamityClient::Client
                                          content_type: "application/json"
                                        }))
 
+
+      check_response_code_for_error(json["statusCode"])
+
       current_page = json["PaggedExamstatusInfo"]["currentpage"]
       total_pages = json["PaggedExamstatusInfo"]["pagecount"]
       appts = json["PaggedExamstatusInfo"]["appointmentStatus"]
@@ -294,6 +323,9 @@ class ExamityClient::Client
                                         {
                                           content_type: "application/json",
                                         }))
+
+      check_response_code_for_error(json["statusCode"])
+
       @token = json["authInfo"]["access_token"]
       @token
     rescue RestClient::Exception => e
@@ -313,6 +345,8 @@ class ExamityClient::Client
                                          authorization: token,
                                          content_type: "application/json",
                                        }))
+
+      check_response_code_for_error(json["statusCode"])
 
       ExamityClient::User.from_examity_api(json["profileInfo"])
     rescue RestClient::Unauthorized => e
@@ -337,4 +371,14 @@ class ExamityClient::Client
     end
     @logger.warn("ExamityClient: #{message}")
   end
+
+  # Examity sends a response code for every request, some codes represent error conditions
+  # we through an error for the error conditions to allow the controller a chance to respond
+  def check_response_code_for_error(code)
+    code = code.to_i
+
+    error, msg = code_in_error?(code)
+    raise ExamityClient::Error.new({error: true, code: code, messge: msg}.to_json) if error
+  end
+
 end
