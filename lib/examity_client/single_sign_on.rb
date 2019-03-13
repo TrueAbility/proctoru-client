@@ -1,4 +1,6 @@
 require "digest"
+require "base64"
+
 class ExamityClient::SingleSignOn
   # iv and secret key are the same
   ALG = "AES-128-CBC"
@@ -11,8 +13,8 @@ class ExamityClient::SingleSignOn
 
     key = key.byteslice(0, 16) # must be 16 bytes
 
-
-    key64 = [key].pack("m")
+    key64 = Base64.strict_encode64(key)
+    # key64 = [key].pack("m")
     aes = OpenSSL::Cipher.new(ALG)
     aes.encrypt
     aes.key = key
@@ -20,7 +22,8 @@ class ExamityClient::SingleSignOn
 
     cipher = aes.update(email)
     cipher << aes.final
-    cipher64 = [cipher].pack('m')
+    cipher64 = Base64.strict_encode64(cipher)
+    # cipher64 = [cipher].pack('m')
     cipher64
   end
 end
