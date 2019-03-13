@@ -4,6 +4,7 @@ class ExamityClient::Client < ExamityClient::Base
 
   def initialize(config = ExamityClient.configuration)
     @config = config
+    self
   end
 
   def configure
