@@ -17,7 +17,7 @@ class ExamityClient::SchedulingTest < Minitest::Test
     @user = ExamityClient::User.new(id: 1, first: "First", last: "Last", email: "first.last@email.com")
     @course = ExamityClient::Course.new(id: 1001, name: "One thousand and one")
     @exam = ExamityClient::Exam.new(id: 2002, name: "Two thousand and two", url: "http://2002.dev",
-                                    duration_in_minutes: 60, time_zone: 1, date: Time.current)
+                                    duration_in_minutes: 60, time_zone: 1, date: Time.now)
   end
 
   def test_scheduling_exam

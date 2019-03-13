@@ -12,10 +12,9 @@ require_relative "examity_client/flag"
 require_relative "examity_client/single_sign_on"
 require_relative "examity_client/test_api_server"
 
-
+require "hash_ext"
 require "rest-client"
 require "awesome_print"
-require "active_support/core_ext/hash"
 require "logger"
 
 module ExamityClient

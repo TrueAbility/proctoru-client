@@ -63,7 +63,7 @@ class ExamityClient::Base
   def code_in_error?(code)
     code = code.to_i
     details = STATUS_CODES[code]
-    if details.blank?
+    if details.nil?
       return [true, "Invalid response code"]
     else
       return [details[:error], details[:message]]

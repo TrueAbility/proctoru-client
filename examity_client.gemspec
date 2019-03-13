@@ -33,5 +33,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "capybara_discoball"
   spec.add_dependency "awesome_print"
   spec.add_dependency "rest-client"
-  spec.add_dependency "activesupport", "~> 5.2.1.1"
 end
