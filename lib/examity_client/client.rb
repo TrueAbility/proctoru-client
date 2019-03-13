@@ -12,7 +12,7 @@ class ExamityClient::Client < ExamityClient::Base
 
   # pass through for sso token
   def sso_token(email)
-    ExamityCient::SingleSignOn::token(config.encryption_key, email)
+    ExamityClient::SingleSignOn::token(config.encryption_key, email)
   end
 
   # GET
