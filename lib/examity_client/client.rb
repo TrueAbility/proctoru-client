@@ -100,6 +100,7 @@ class ExamityClient::Client < ExamityClient::Base
           examInstruction: exam.instructions,
           examLevel: exam.level,
         }}
+
       json = JSON.parse(RestClient.post(url,
                                         body.to_json,
                                         {
@@ -379,7 +380,7 @@ class ExamityClient::Client < ExamityClient::Base
     code = code.to_i
 
     error, msg = code_in_error?(code)
-    raise ExamityClient::Error.new({error: true, code: code, messge: msg}.to_json) if error
+    raise ExamityClient::Error.new(msg, code) if error
   end
 
 end
