@@ -101,7 +101,7 @@ class ExamityClient::Client < ExamityClient::Base
           examLevel: exam.level,
         }}
 
-      logger.warn("Schedule Request: #{body.to_json}")
+      logger("Schedule Request: #{body.to_json}")
 
       json = JSON.parse(RestClient.post(url,
                                         body.to_json,
@@ -369,10 +369,10 @@ class ExamityClient::Client < ExamityClient::Base
     unless @logger
       begin
         @logger = ::Rails.logger
-        RestClient.logger = @logger
+        RestClient.log = @logger
       rescue NoMethodError, NameError
         @logger = Logger.new(STDERR)
-        RestClient.logger = @logger
+        RestClient.log = @logger
         @logger.warn "No rails logger, using standalone"
       end
     end
