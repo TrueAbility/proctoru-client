@@ -4,7 +4,7 @@ class ExamityClient::Client < ExamityClient::Base
 
   def initialize(config = ExamityClient.configuration)
     @config = config
-    self
+    logger("Configured: #{config.to_json}")
   end
 
   def configure
@@ -100,6 +100,8 @@ class ExamityClient::Client < ExamityClient::Base
           examInstruction: exam.instructions,
           examLevel: exam.level,
         }}
+
+      logger.warn("Schedule Request: #{body.to_json}")
 
       json = JSON.parse(RestClient.post(url,
                                         body.to_json,
@@ -363,14 +365,18 @@ class ExamityClient::Client < ExamityClient::Base
 
   private
   def logger(message)
+    message = "EXAMITY CLIENT: #{message}"
     unless @logger
       begin
         @logger = ::Rails.logger
+        RestClient.logger = @logger
       rescue NoMethodError, NameError
         @logger = Logger.new(STDERR)
+        RestClient.logger = @logger
         @logger.warn "No rails logger, using standalone"
       end
     end
+
     @logger.warn("ExamityClient: #{message}")
   end
 
