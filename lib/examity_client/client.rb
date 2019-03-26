@@ -4,7 +4,7 @@ class ExamityClient::Client < ExamityClient::Base
 
   def initialize(config = ExamityClient.configuration)
     @config = config
-    logger("Configured: #{config.to_json}")
+    logger("Configured: #{config.to_json(except: ["encryption_key", "secret_key"])}")
   end
 
   def configure
