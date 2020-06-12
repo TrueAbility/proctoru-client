@@ -244,8 +244,8 @@ class ExamityClient::Client < ExamityClient::Base
 
       check_response_code_for_error(json["statusCode"])
 
-      page_info = json["PaggedExamstatusInfo"]
-      exams_info = json["PaggedExamstatusInfo"]["appointmentStatus"]
+      page_info = json["appointmentStatusInfo"]
+      exams_info = json["appointmentStatusInfo"]["appointmentStatus"]
       @pagination = {
         current: page_info["currentpage"],
         total: page_info["pagecount"],
@@ -253,8 +253,8 @@ class ExamityClient::Client < ExamityClient::Base
 
 
       @exams = exams_info.collect do |j|
-        user_info = json["PaggedExamstatusInfo"]["appointmentStatus"]["userInfo"]
-        appt_info = json["PaggedExamstatusInfo"]["appointmentStatus"]["appointmentInfo"]
+        user_info = json["appointmentStatusInfo"]["appointmentStatus"]["userInfo"]
+        appt_info = json["appointmentStatusInfo"]["appointmentStatus"]["appointmentInfo"]
         {
           user: User.from_examity_api(user_info),
           exams: appt_info.collect do |j|
@@ -289,9 +289,9 @@ class ExamityClient::Client < ExamityClient::Base
 
       check_response_code_for_error(json["statusCode"])
 
-      current_page = json["PaggedExamstatusInfo"]["currentpage"]
-      total_pages = json["PaggedExamstatusInfo"]["pagecount"]
-      appts = json["PaggedExamstatusInfo"]["appointmentStatus"]
+      current_page = json["appointmentStatusInfo"]["currentpage"]
+      total_pages = json["appointmentStatusInfo"]["pagecount"]
+      appts = json["appointmentStatusInfo"]["appointmentStatus"]
       user = appt[0]["userInfo"]
       appointment = appt[0]["appointmentInfo"]
       return {
