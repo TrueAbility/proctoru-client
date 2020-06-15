@@ -215,7 +215,7 @@ class ExamityClient::Client < ExamityClient::Base
         current: page_info["currentpage"],
         total: page_info["pagecount"],
       }
-      @user = User.from_examity_api(user_info)
+      @user = ExamityClient::User.from_examity_api(user_info)
       @exams = exams_info.collect do |j|
         Appointment.from_examity_api(j)
       end
@@ -256,7 +256,7 @@ class ExamityClient::Client < ExamityClient::Base
         user_info = json["appointmentStatusInfo"]["appointmentStatus"]["userInfo"]
         appt_info = json["appointmentStatusInfo"]["appointmentStatus"]["appointmentInfo"]
         {
-          user: User.from_examity_api(user_info),
+          user: ExamityClient::User.from_examity_api(user_info),
           exams: appt_info.collect do |j|
             Appointment.from_examity_api(j)
           end
@@ -295,7 +295,7 @@ class ExamityClient::Client < ExamityClient::Base
       user = appts[0]["userInfo"]
       appointment = appts[0]["appointmentInfo"]
       return {
-        user: User.from_examity_api(user),
+        user: ExamityClient::User.from_examity_api(user),
         appointment: Appointment.from_examity_api(appointment)
       }
 
