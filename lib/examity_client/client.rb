@@ -292,8 +292,8 @@ class ExamityClient::Client < ExamityClient::Base
       current_page = json["appointmentStatusInfo"]["currentpage"]
       total_pages = json["appointmentStatusInfo"]["pagecount"]
       appts = json["appointmentStatusInfo"]["appointmentStatus"]
-      user = appt[0]["userInfo"]
-      appointment = appt[0]["appointmentInfo"]
+      user = appts[0]["userInfo"]
+      appointment = appts[0]["appointmentInfo"]
       return {
         user: User.from_examity_api(user),
         appointment: Appointment.from_examity_api(appointment)
