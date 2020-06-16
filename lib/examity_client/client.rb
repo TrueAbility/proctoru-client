@@ -215,7 +215,7 @@ class ExamityClient::Client < ExamityClient::Base
         current: page_info["currentpage"],
         total: page_info["pagecount"],
       }
-      @user = ExamityClient::User.from_examity_api(user_info)
+      @user = User.from_examity_api(user_info)
       @exams = exams_info.collect do |j|
         Appointment.from_examity_api(j)
       end
@@ -256,7 +256,7 @@ class ExamityClient::Client < ExamityClient::Base
         user_info = json["appointmentStatusInfo"]["appointmentStatus"]["userInfo"]
         appt_info = json["appointmentStatusInfo"]["appointmentStatus"]["appointmentInfo"]
         {
-          user: ExamityClient::User.from_examity_api(user_info),
+          user: User.from_examity_api(user_info),
           exams: appt_info.collect do |j|
             Appointment.from_examity_api(j)
           end
@@ -280,6 +280,8 @@ class ExamityClient::Client < ExamityClient::Base
     begin
       retries ||= 0
       url = config.base_url + "/examity/api/exams/#{transaction_id}"
+      # dummy_response = "{\"statusCode\":3006,\"message\":\"User Appointmentstaus.\",\"timeStamp\":\"2020-06-16T09:40:37Z\",\"appointmentStatusInfo\":{\"currentpage\":1,\"pagecount\":1,\"appointmentStatus\":[{\"userInfo\":{\"userId\":\"skatiyar@alteryx.com\",\"firstName\":\"Sachin\",\"lastName\":\"Katiyar\",\"emailAddress\":\"skatiyar@alteryx.com\"},\"appointmentInfo\":{\"transactionId\":\"12000020021\",\"courseId\":\"86387-3924\",\"courseName\":\"Alteryx-Integration Testing [SANDBOX]\",\"examId\":\"902d7565-0257-4933-8efc-b3a7b58f3449\",\"examName\":\"Integration Testing [SANDBOX]\",\"examURL\":\"https://staging.trueability.com/instances/902d7565-0257-4933-8efc-b3a7b58f3449?assessment_reservation_uuid=true\",\"examDuration\":10,\"examPassword\":\"none\",\"examUserName\":\"skatiyar@alteryx.com\",\"timeZone\":\"2\",\"examDate\":\"2020-06-15T15:00:00\",\"examInstruction\":\"TrueAbility Support Access Procedures for Examity\\n\\nContacting TrueAbility\\nIn order to provide rapid response to any issues during or prior to an exam session, Proctors should contact TrueAbility via the TrueAbility Support channels defined below.\\nTrueAbility support is available 24 x 7, 365.\\n\\nThe Proctor can contact TrueAbility Support through any of the following methods:\\n\\nEmail Support – support@trueability.com\\nPhone Support – 1-866-966-4133\\nProctor support request procedure\\nIf an issue occurs during or prior to the exam session, the Proctor or Examity staff should pause the exam and:\\nEmail or call TrueAbility Support with the following information:\\nCandidate name\\nExam being taken\\nIssue being reported\\nThe TrueAbility Support personnel will begin working on the issue and will:\\nRespond to ticket/call requesting additional information if needed.\\nProvide updates via the ticket/call as the issue is worked.\\nSend a message via ticket/call once the issue is resolved.\\n\",\"status\":\"Active\",\"examLevel\":\"4\",\"examStatus\":\"No-show\",\"flaginfo\":[{\"flagtype\":\"Violation\",\"flagdescription\":\"Candidate invited his friends for a party before the exam was over.\",\"flagtimestamp\":\"2020-06-16T09:40:37Z\"},{\"flagtype\":\"Alert\",\"flagdescription\":\"System was not running for an hour so I fell asleep while waiting for technical team to fix all the issues.\",\"flagtimestamp\":\"2020-06-16T09:40:37Z\"}]}}]}}"
+
       json = JSON.parse(RestClient.get(url,
                                        {
                                          authorization: token,
@@ -291,9 +293,9 @@ class ExamityClient::Client < ExamityClient::Base
 
       current_page = json["appointmentStatusInfo"]["currentpage"]
       total_pages = json["appointmentStatusInfo"]["pagecount"]
-      appts = json["appointmentStatusInfo"]["appointmentStatus"]
-      user = appts[0]["userInfo"]
-      appointment = appts[0]["appointmentInfo"]
+      appt = json["appointmentStatusInfo"]["appointmentStatus"]
+      user = appt[0]["userInfo"]
+      appointment = appt[0]["appointmentInfo"]
       return {
         user: ExamityClient::User.from_examity_api(user),
         appointment: Appointment.from_examity_api(appointment)
