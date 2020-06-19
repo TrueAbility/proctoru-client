@@ -113,7 +113,7 @@ class ExamityClient::Client < ExamityClient::Base
       check_response_code_for_error(json["statusCode"])
 
       appt_info = json["appointmentInfo"]
-      Appointment.from_examity_api(appt_info)
+      ExamityClient::Appointment.from_examity_api(appt_info)
     rescue RestClient::Unauthorized => e
       get_token
       retry if (retries += 1) < 2
@@ -158,7 +158,7 @@ class ExamityClient::Client < ExamityClient::Base
       check_response_code_for_error(json["statusCode"])
 
       appt_info = json["appointmentInfo"]
-      Appointment.from_examity_api(appt_info)
+      ExamityClient::Appointment.from_examity_api(appt_info)
     rescue RestClient::Unauthorized => e
       get_token
       retry if (retries += 1) < 2
@@ -183,7 +183,7 @@ class ExamityClient::Client < ExamityClient::Base
       check_response_code_for_error(json["statusCode"])
 
       appt_info = json["appointmentInfo"]
-      Appointment.from_examity_api(appt_info)
+      ExamityClient::Appointment.from_examity_api(appt_info)
     rescue RestClient::Unauthorized => e
       get_token
       retry if (retries += 1) < 2
@@ -217,7 +217,7 @@ class ExamityClient::Client < ExamityClient::Base
       }
       @user = User.from_examity_api(user_info)
       @exams = exams_info.collect do |j|
-        Appointment.from_examity_api(j)
+        ExamityClient::Appointment.from_examity_api(j)
       end
 
       return {user: @user, exams: @exams, pagination: @pagination}
@@ -256,9 +256,9 @@ class ExamityClient::Client < ExamityClient::Base
         user_info = json["appointmentStatusInfo"]["appointmentStatus"]["userInfo"]
         appt_info = json["appointmentStatusInfo"]["appointmentStatus"]["appointmentInfo"]
         {
-          user: User.from_examity_api(user_info),
+          user: ExamityClient::User.from_examity_api(user_info),
           exams: appt_info.collect do |j|
-            Appointment.from_examity_api(j)
+            ExamityClient::Appointment.from_examity_api(j)
           end
         }
       end
@@ -298,7 +298,7 @@ class ExamityClient::Client < ExamityClient::Base
       appointment = appt[0]["appointmentInfo"]
       return {
         user: ExamityClient::User.from_examity_api(user),
-        appointment: Appointment.from_examity_api(appointment)
+        appointment: ExamityClient::Appointment.from_examity_api(appointment)
       }
 
     rescue RestClient::Unauthorized => e

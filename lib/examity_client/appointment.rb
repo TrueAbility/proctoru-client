@@ -1,4 +1,4 @@
-class Appointment
+class ExamityClient::Appointment
   attr_accessor :course_id,
                 :course_name,
                 :date,
@@ -54,7 +54,7 @@ class Appointment
     @flags = []
 
     if opts[:flags]
-      @flags = opts[:flags].collect{|x| ExamityClient::Flag.from_examity_api(x)}
+      @flags = opts[:flags].collect { |x| ExamityClient::Flag.new(x) }
     end
 
     self
