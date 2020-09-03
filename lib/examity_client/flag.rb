@@ -2,22 +2,22 @@ class ExamityClient::Flag
   attr_accessor :type, :description, :timestamp
 
   def self.from_examity_api(json)
-    self.new(type: json["flagtype"],
-             description: json["flagdescription"],
-             timestamp: json["flagtimestamp"])
+    new(flagtype: json["flagtype"],
+        flagdescription: json["flagdescription"],
+        flagtimestamp: json["flagtimestamp"])
   end
 
   def initialize(opts = {})
     opts.symbolize_keys!
 
-    @type = opts[:type]
-    @description = opts[:description]
-    @timestamp = opts[:timestamp]
+    @type = opts[:flagtype]
+    @description = opts[:flagdescription]
+    @timestamp = opts[:flagtimestamp]
     self
   end
 
   def color
-    case type.downcase.squish
+    case type&.downcase&.squish
     when "violation"
       :red
     when "possible violation"
