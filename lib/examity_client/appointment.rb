@@ -53,7 +53,7 @@ class ExamityClient::Appointment
     @username = opts[:username]
     @flags = []
 
-    if opts[:flags].any?
+    if opts[:flags].present?
       @flags = opts[:flags].collect { |x| ExamityClient::Flag.new(x) }
     end
 
