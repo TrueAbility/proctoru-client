@@ -287,7 +287,7 @@ class ExamityClient::Client < ExamityClient::Base
                                          authorization: token,
                                          content_type: "application/json"
                                        }))
-
+      json = JSON.parse(dummy_response)
 
       check_response_code_for_error(json["statusCode"])
 

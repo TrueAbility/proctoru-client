@@ -36,7 +36,7 @@ class ExamityClient::Appointment
   end
 
   def initialize(opts = {})
-    opts.symbolize_keys!
+    opts.deep_symbolize_keys!
     @course_id = opts[:course_id]
     @course_name = opts[:course_name]
     @date = opts[:date]
@@ -54,7 +54,14 @@ class ExamityClient::Appointment
     @flags = []
 
     if opts[:flags].present?
-      @flags = opts[:flags].collect { |x| ExamityClient::Flag.new(x) }
+      @flags =
+        opts[:flags].collect do |flag|
+          flag_options = flag
+          flag_options[:type] ||= flag[:flagtype]
+          flag_options[:description] ||= flag[:flagdescription]
+          flag_options[:timestamp] ||= flag[:flagtimestamp]
+          ExamityClient::Flag.new(flag_options)
+        end
     end
 
     self

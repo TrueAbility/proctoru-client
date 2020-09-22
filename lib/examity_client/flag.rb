@@ -1,18 +1,12 @@
 class ExamityClient::Flag
   attr_accessor :type, :description, :timestamp
 
-  def self.from_examity_api(json)
-    new(flagtype: json["flagtype"],
-        flagdescription: json["flagdescription"],
-        flagtimestamp: json["flagtimestamp"])
-  end
-
   def initialize(opts = {})
     opts.symbolize_keys!
 
-    @type = opts[:flagtype]
-    @description = opts[:flagdescription]
-    @timestamp = opts[:flagtimestamp]
+    @type = opts[:type]
+    @description = opts[:description]
+    @timestamp = opts[:timestamp]
     self
   end
 
