@@ -120,7 +120,7 @@ class ExamityClient::Client < ExamityClient::Base
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
-      raise ExamityClient::Error.new(json["errorInfo"])
+      raise ExamityClient::Error.new(json["errorInfo"], json["statusCode"])
     end
   end
 
@@ -165,7 +165,7 @@ class ExamityClient::Client < ExamityClient::Base
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
-      raise ExamityClient::Error.new(json["errorInfo"])
+      raise ExamityClient::Error.new(json["errorInfo"], json["statusCode"])
     end
   end
 
@@ -190,7 +190,7 @@ class ExamityClient::Client < ExamityClient::Base
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
-      raise ExamityClient::Error.new(json["errorInfo"])
+      raise ExamityClient::Error.new(json["errorInfo"], json["statusCode"])
     end
   end
 
