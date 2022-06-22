@@ -148,6 +148,8 @@ class ExamityClient::Client < ExamityClient::Base
           examLevel: exam.level,
         }}
 
+      logger("Reschedule Request: #{body.to_json}")
+
       json = JSON.parse(RestClient.put(url,
                                        body.to_json,
                                        {
@@ -174,6 +176,9 @@ class ExamityClient::Client < ExamityClient::Base
     begin
       retries ||= 0
       url = config.base_url + "/examity/api/cancel/#{transaction_id}"
+
+      logger("Cancel Request: #{url.to_json}")
+
       json = JSON.parse(RestClient.delete(url,
                                           {
                                             authorization: token,
