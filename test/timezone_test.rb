@@ -2,17 +2,17 @@ require_relative "./test_helper"
 require "examity_client"
 require "capybara_discoball"
 
-class ExamityClient::TimezoneTest < Minitest::Test
+class ProctoruClient::TimezoneTest < Minitest::Test
   attr_accessor :client
 
   def setup
-    Capybara::Discoball.spin(ExamityClient::TestApiServer) do |server|
-      config = ExamityClient::Configuration.new(
+    Capybara::Discoball.spin(ProctoruClient::TestApiServer) do |server|
+      config = ProctoruClient::Configuration.new(
         base_url: server.url,
         client_id: "my client id",
         secret_key: "my secret")
 
-      @client = ExamityClient::Client.new(config)
+      @client = ProctoruClient::Client.new(config)
     end
   end
 

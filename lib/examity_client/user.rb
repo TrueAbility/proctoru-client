@@ -1,4 +1,4 @@
-class ExamityClient::User
+class ProctoruClient::User
   attr_accessor :email,
                 :first_name,
                 :id,
@@ -8,13 +8,24 @@ class ExamityClient::User
                 :time_zone
 
   def self.from_examity_api(json)
-    ExamityClient::User.new(id: json["userId"],
+    ProctoruClient::User.new(id: json["userId"],
              first_name: json["firstName"],
              last_name: json["lastName"],
              email: json["emailAddress"],
              phone_number: json["phoneNumber"],
              profile_completed: json["profile_completed"],
              time_zone: json["timezone"]
+            )
+  end
+
+  def self.from_proctoru_api(json)
+    ProctoruClient::User.new(id: json["student_id"],
+             first_name: json["first_name"],
+             last_name: json["last_name"],
+             email: json["email"],
+             phone_number: json["phone1"],
+             profile_completed: json["profilecomplete"],
+             time_zone: json["time_zone_id"]
             )
   end
 

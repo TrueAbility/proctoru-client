@@ -1,4 +1,4 @@
-class ExamityClient::Course
+class ProctoruClient::Course
   attr_accessor :id, :name
 
   def initialize(opts = {})

@@ -1,4 +1,4 @@
-# ExamityClient
+# ProctoruClient
 
 Wrapper around the Examity scheduling API. This is a private gem. A local test server for the API is included, run this with
 
@@ -15,7 +15,7 @@ curl -X POST -d  '{"clientId": "1", "secretKey": "2"}' \
 
 Usage of the client:
 ```ruby
-client = ExamityClient::Client.new do
+client = ProctoruClient::Client.new do
   client_id = "your client id"
   secret_key = "your secret key"
 end

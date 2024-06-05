@@ -1,4 +1,4 @@
-class ExamityClient::Flag
+class ProctoruClient::Flag
   attr_accessor :type, :description, :timestamp
 
   def initialize(opts = {})

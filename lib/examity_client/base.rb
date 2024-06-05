@@ -1,4 +1,4 @@
-class ExamityClient::Base
+class ProctoruClient::Base
 
   # This API doesn't use HTTP Codes to properly indicate errors, we must rely
   # on the message and code id in the response
@@ -60,9 +60,15 @@ class ExamityClient::Base
     5001 => {statusCode: 5001, message: "Invalid Content-Type."},
   }
 
+  PU_STATUS_CODES = {
+    1 => {statusCode: 200, message: "OK"},
+    2	=> {statusCode: 203, message: "Invalid Credentials provided."},
+    3	=> {statusCode: 400, message: "Invalid parameter(s) or parameter(s) is empty."}
+  }
+
   def code_in_error?(code)
     code = code.to_i
-    details = STATUS_CODES[code]
+    details = PU_STATUS_CODES[code]
     if details.nil?
       return [true, "Invalid response code"]
     else

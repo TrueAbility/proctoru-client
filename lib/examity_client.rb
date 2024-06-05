@@ -17,9 +17,9 @@ require "rest-client"
 require "awesome_print"
 require "logger"
 
-module ExamityClient
-  # https://prod.examity.com/trueabilityapi/help
-
+module ProctoruClient
+  # https://postman.proctoru.com/#395086d0-dd24-028e-29db-dece1c07324e
+  
   class << self
     attr_writer :configuration
   end

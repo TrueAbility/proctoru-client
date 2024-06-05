@@ -4,7 +4,7 @@ require "examity_client/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "examity_client"
-  spec.version       = ExamityClient::VERSION
+  spec.version       = ProctoruClient::VERSION
   spec.authors       = ["Dusty Jones"]
   spec.email         = ["dusty@trueability.com"]
 

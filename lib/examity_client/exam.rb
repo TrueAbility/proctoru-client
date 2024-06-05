@@ -1,4 +1,4 @@
-class ExamityClient::Exam
+class ProctoruClient::Exam
   attr_accessor :id, :name, :url, :duration_in_minutes, :password, :username, :time_zone,
                 :date, :instructions, :level, :transaction_id, :course_id, :course_name,
                 :flags

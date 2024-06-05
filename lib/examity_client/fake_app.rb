@@ -1,7 +1,7 @@
 require "sinatra"
 require "awesome_print"
 
-module ExamityClient
+module ProctoruClient
   class FakeApp < Sinatra::Base
     def authorized?
       header = request.env["HTTP_AUTHORIZATION"]
@@ -11,10 +11,10 @@ module ExamityClient
     def protected!
       unless authorized?
         throw(:halt, [401, {
-                        "statusCode": 401,
+                        "response_code": 401,
                             "message": "Invalid access token.",
                             "timeStamp": Time.current,
-                            "errorInfo": [
+                            "message": [
                                            "Invalid access token."
                                          ]
                       }.to_json])
@@ -26,7 +26,7 @@ module ExamityClient
       protected!
       payload = JSON.parse(request.body.read, symbolize_names: true)
       {
-        statusCode: 200,
+        response_code: 200,
         message: "Successful Result",
         appointmentInfo: {
           transactionId: 101,
@@ -41,7 +41,7 @@ module ExamityClient
       protected!
       payload = JSON.parse(request.body.read, symbolize_names: true)
       {
-        statusCode: 200,
+        response_code: 200,
         message: "Successful Result",
         appointmentInfo: {
           transactionId: payload[:examInfo][:transactionId],
@@ -57,7 +57,7 @@ module ExamityClient
       transaction_id = params[:transaction_id].to_i
 
       {
-        statusCode: 200,
+        response_code: 200,
         message: "Successful Result",
         appointmentInfo: {
           transactionId: transaction_id,
@@ -71,7 +71,7 @@ module ExamityClient
     post "/examity/api/token" do
       payload = JSON.parse(request.body.read, symbolize_names: true)
       {
-        statusCode: 200,
+        response_code: 200,
         message: "Successful result",
         timestamp: Time.current,
         authInfo: {
@@ -88,7 +88,7 @@ module ExamityClient
       user_id = params[:user_id].to_s
 
       {
-        statusCode: 200,
+        response_code: 200,
         message: "Successful result",
         timestamp: Time.current,
         profileInfo: {

@@ -1,4 +1,4 @@
-class ExamityClient::Appointment
+class ProctoruClient::Appointment
   attr_accessor :course_id,
                 :course_name,
                 :date,
@@ -35,6 +35,26 @@ class ExamityClient::Appointment
             )
   end
 
+  def self.from_proctoru_api(json)
+    self.new( 
+              id: json["reservation_id"],
+              url: json["url"],
+              course_id: json["courseno"],
+              course_name: json["course_name"],
+              exam_id: json["exam_id"],
+              exam_name: json["exam_name"],
+              duration_in_minutes: json["duration_in_minutes"],
+              password: json["exam_password"],
+              username: json["exam_serName"],
+              time_zone: json["time_zone"],
+              date: json["exam_date"] || json["start_date"], 
+              instructions: json["exam_instruction"] || json["instruction"],
+              status: json["exam_status"] || json["status"],
+              level: json["exam_level"],
+              flags: json["flaginfo"]
+            )
+  end
+
   def initialize(opts = {})
     opts.deep_symbolize_keys!
     @course_id = opts[:course_id]
@@ -60,7 +80,7 @@ class ExamityClient::Appointment
           flag_options[:type] ||= flag[:flagtype]
           flag_options[:description] ||= flag[:flagdescription]
           flag_options[:timestamp] ||= flag[:flagtimestamp]
-          ExamityClient::Flag.new(flag_options)
+          ProctoruClient::Flag.new(flag_options)
         end
     end
 

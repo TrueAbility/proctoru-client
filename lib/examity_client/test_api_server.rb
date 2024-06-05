@@ -1,6 +1,6 @@
 require "sinatra/base"
 
-class ExamityClient::TestApiServer < Sinatra::Base
+class ProctoruClient::TestApiServer < Sinatra::Base
   def authorized?
     header = request.env["HTTP_AUTHORIZATION"]
     header == 'secret_token'
@@ -9,10 +9,10 @@ class ExamityClient::TestApiServer < Sinatra::Base
   def protected!
     unless authorized?
       throw(:halt, [401, {
-                      "statusCode": 401,
+                      "response_code": 401,
                           "message": "Invalid access token.",
                           "timeStamp": Time.now,
-                          "errorInfo": [
+                          "message": [
                                          "Invalid access token."
                                        ]
                     }.to_json + "\n"])
@@ -23,7 +23,7 @@ class ExamityClient::TestApiServer < Sinatra::Base
   get "/examity/api/timezone" do
     protected!
     {
-      statusCode: 200,
+      response_code: 200,
       message: "Successful request",
       timeStamp: Time.now,
       timezoneInfo: [
@@ -130,7 +130,7 @@ class ExamityClient::TestApiServer < Sinatra::Base
     protected!
     payload = JSON.parse(request.body.read, symbolize_names: true)
     {
-      statusCode: 200,
+      response_code: 200,
       message: "Successful Result",
       appointmentInfo: {
         transactionId: 101,
@@ -145,7 +145,7 @@ class ExamityClient::TestApiServer < Sinatra::Base
     protected!
     payload = JSON.parse(request.body.read, symbolize_names: true)
     {
-      statusCode: 200,
+      response_code: 200,
       message: "Successful Result",
       appointmentInfo: {
         transactionId: payload[:examInfo][:transactionId],
@@ -161,7 +161,7 @@ class ExamityClient::TestApiServer < Sinatra::Base
     transaction_id = params[:transaction_id].to_i
 
     {
-      statusCode: 200,
+      response_code: 200,
       message: "Successful Result",
       appointmentInfo: {
         transactionId: transaction_id,
@@ -175,7 +175,7 @@ class ExamityClient::TestApiServer < Sinatra::Base
   post "/examity/api/token" do
     payload = JSON.parse(request.body.read, symbolize_names: true)
     {
-      statusCode: 200,
+      response_code: 200,
       message: "Successful result",
       timestamp: Time.now,
       authInfo: {
@@ -192,7 +192,7 @@ class ExamityClient::TestApiServer < Sinatra::Base
     user_id = params[:user_id].to_s
 
     {
-      statusCode: 200,
+      response_code: 200,
       message: "Successful result",
       timestamp: Time.now,
       profileInfo: {
