@@ -1,5 +1,5 @@
 require_relative "./test_helper"
-require "examity_client"
+require "proctoru_client"
 require "capybara_discoball"
 
 class ProctoruClient::TimezoneTest < Minitest::Test

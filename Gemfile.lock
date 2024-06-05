@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    examity_client (0.1.7)
+    proctoru_client (0.1.7)
       awesome_print
       rest-client
 
@@ -65,7 +65,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.16)
   capybara_discoball
-  examity_client!
+  proctoru_client!
   minitest (~> 5.0)
   rake (~> 10.0)
   sinatra

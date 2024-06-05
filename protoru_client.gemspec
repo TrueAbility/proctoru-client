@@ -1,14 +1,14 @@
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "examity_client/version"
+require "proctoru_client/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "examity_client"
+  spec.name          = "proctoru_client"
   spec.version       = ProctoruClient::VERSION
   spec.authors       = ["Dusty Jones"]
   spec.email         = ["dusty@trueability.com"]
 
-  spec.summary       = %q{Internal Gem to access Examity API}
+  spec.summary       = %q{Internal Gem to access ProctorU API}
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.

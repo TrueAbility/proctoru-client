@@ -16,8 +16,7 @@ curl -X POST -d  '{"clientId": "1", "secretKey": "2"}' \
 Usage of the client:
 ```ruby
 client = ProctoruClient::Client.new do
-  client_id = "your client id"
-  secret_key = "your secret key"
+  api_key = "your api key"
 end
 
 
@@ -26,7 +25,7 @@ end
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'examity_client'
+gem 'proctoru_client'
 ```
 
 And then execute:
@@ -35,7 +34,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install examity_client
+    $ gem install proctoru_client
 
 ## Usage
 
@@ -49,4 +48,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/trueability/examity_clientr.
+Bug reports and pull requests are welcome on GitHub at https://github.com/trueability/proctoru_clientr.
