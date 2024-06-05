@@ -161,7 +161,7 @@ class ProctoruClient::Client < ProctoruClient::Base
   def cancel(user, transaction_id)
     begin
       retries ||= 0
-      url = config.base_url + "/examity/api/removeReservation"
+      url = config.base_url + "/api/removeReservation"
       logger("Cancel Request: #{url.to_json}")
       body = {
         student_id: user.id, #Institution's unique test-taker ID
@@ -253,7 +253,7 @@ class ProctoruClient::Client < ProctoruClient::Base
       current_term = terms_for_institution
 
       retries ||= 0
-      url = config.base_url + "/examity/getInstitutionExamList"
+      url = config.base_url + "/api/getInstitutionExamList"
       body = {
         time_sent: Time.current,
         term_id: current_term["term_id"],
@@ -289,7 +289,8 @@ class ProctoruClient::Client < ProctoruClient::Base
   end
 
   # GET
-  def exam(transaction_id)
+  # Getting exam info for specific reservation no will also required user_id
+  def exam(transaction_id, user)
     begin
       retries ||= 0
       url = config.base_url + "/api/getScheduleInfoAvailableTimesList"
@@ -297,23 +298,24 @@ class ProctoruClient::Client < ProctoruClient::Base
         takeitnow: 'N',
         isadhoc: 'Y',
         reservation_no: transaction_id,
+        student_id: user.id, #Required if we query with reservation_no
         start_date: Time.now
       }
       json = JSON.parse(RestClient.get(url,
-                                      body,
+                                       body.to_json,
                                        {
                                          authorization: token,
                                          content_type: "application/json"
                                        }))
       check_response_code_for_error(json["response_code"])
-      current_page = json["appointmentStatusInfo"]["currentpage"]
-      total_pages = json["appointmentStatusInfo"]["pagecount"]
-      appt = json["appointmentStatusInfo"]["appointmentStatus"]
-      user = appt[0]["userInfo"]
-      appointment = appt[0]["appointmentInfo"]
+      appt_info = json["data"]
+
+      # FIXME: we can omit this since we only need appointment info 
+      user_info = user_profile(user)
+
       return {
-        user: ProctoruClient::User.from_examity_api(user),
-        appointment: ProctoruClient::Appointment.from_examity_api(appointment)
+        user: user_info,
+        appointment: ProctoruClient::Appointment.from_proctoru_api(appt_info)
       }
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
@@ -325,8 +327,8 @@ class ProctoruClient::Client < ProctoruClient::Base
   # POST
   def get_token
     raise ArgumentError.new("Please provide base_url") unless config.base_url
-    raise ArgumentError.new("Please provide auth_token") unless config.auth_token
-    @token = config.auth_token
+    raise ArgumentError.new("Please provide api_key") unless config.api_key
+    @token = config.api_key
   end
 
   # GET
@@ -365,8 +367,6 @@ class ProctoruClient::Client < ProctoruClient::Base
     @logger.warn("ProctoruClient: #{message}")
   end
 
-  # Examity sends a response code for every request, some codes represent error conditions
-  # we through an error for the error conditions to allow the controller a chance to respond
   def check_response_code_for_error(code)
     code = code.to_i
 
