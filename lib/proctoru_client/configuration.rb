@@ -1,5 +1,5 @@
 class ProctoruClient::Configuration
-  attr_accessor :client_id, :encryption_key, :secret_key, :base_url, :login_url, :api_key
+  attr_accessor :client_id, :encryption_key, :secret_key, :base_url, :login_url, :token
 
   def initialize(opts = {})
     opts.symbolize_keys!

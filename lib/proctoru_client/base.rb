@@ -62,7 +62,7 @@ class ProctoruClient::Base
 
   PU_STATUS_CODES = {
     1 => {statusCode: 200, message: "OK"},
-    2	=> {statusCode: 203, message: "Invalid Credentials provided."},
+    2	=> {statusCode: 500, message: "Internal server error.", error: true },
     3	=> {statusCode: 400, message: "Invalid parameter(s) or parameter(s) is empty."}
   }
 

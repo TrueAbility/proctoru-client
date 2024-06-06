@@ -11,7 +11,7 @@ class ProctoruClient::Client < ProctoruClient::Base
     yield config
   end
 
-  # sso token
+  # sso config.token
   def sso_token(email)
     begin
       retries ||= 0
@@ -22,8 +22,8 @@ class ProctoruClient::Client < ProctoruClient::Base
       json = JSON.parse(RestClient.post(url,
                                         body.to_json,
                                         {
-                                          authorization: token,
-                                          content_type: "application/json"
+                                          authorization_token: config.token,
+                                          content_type: "application/x-www-urlencoded"
                                         }))
       check_response_code_for_error(json["response_code"])
       json["data"]
@@ -42,8 +42,8 @@ class ProctoruClient::Client < ProctoruClient::Base
       url = config.base_url + "/api/getTimeZoneList"
       json = JSON.parse(RestClient.get(url,
                                        {
-                                         authorization: token,
-                                         content_type: "application/json"
+                                          authorization_token: config.token,
+                                          content_type: "application/x-www-urlencoded"
                                        }))
       check_response_code_for_error(json["response_code"])
       json["data"]
@@ -61,7 +61,6 @@ class ProctoruClient::Client < ProctoruClient::Base
       retries ||= 0
       url = config.base_url + "/api/getScheduleInfoAvailableTimesList"
       body = {
-        
         time_zone_id: time_zone_id,
         start_date: exam_date,
         student_id: user.id,
@@ -71,8 +70,8 @@ class ProctoruClient::Client < ProctoruClient::Base
       json = JSON.parse(RestClient.post(url,
                                         body.to_json,
                                         {
-                                          authorization: token,
-                                          content_type: "application/json"
+                                          authorization_token: config.token,
+                                          content_type: "application/x-www-urlencoded"
                                         }))
       check_response_code_for_error(json["response_code"])
       json["data"]
@@ -113,8 +112,8 @@ class ProctoruClient::Client < ProctoruClient::Base
       json = JSON.parse(RestClient.post(url,
                                         body.to_json,
                                         {
-                                          authorization: token,
-                                          content_type: "application/json"
+                                          authorization_token: config.token,
+                                          content_type: "application/x-www-urlencoded"
                                         }))
       check_response_code_for_error(json["response_code"])
       appt_info = json["data"]
@@ -141,8 +140,8 @@ class ProctoruClient::Client < ProctoruClient::Base
       json = JSON.parse(RestClient.post(url,
                                        body.to_json,
                                        {
-                                         authorization: token,
-                                         content_type: "application/json"
+                                        authorization_token: config.token,
+                                        content_type: "application/x-www-urlencoded"
                                        }))
       check_response_code_for_error(json["response_code"])
       appt_info = json["data"]
@@ -168,8 +167,8 @@ class ProctoruClient::Client < ProctoruClient::Base
       json = JSON.parse(RestClient.post(url,
                                 body.to_json,
                                 {
-                                  authorization: token,
-                                  content_type: "application/json"
+                                  authorization_token: config.token,
+                                  content_type: "application/x-www-urlencoded"
                                 }))
       check_response_code_for_error(json["response_code"])
       appt_info = json["data"]
@@ -180,15 +179,16 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
   ##################### End AssessmentReservation ######################
-  def reservation(student_id)
+  def reservations_for_user(student_id)
     begin
       retries ||= 0
       url = config.base_url + "/api/getStudentReservationList?student_id=#{student_id}"
       json = JSON.parse(RestClient.get(url,
                                        {
-                                         authorization: token,
-                                         content_type: "application/json"
+                                        authorization_token: config.token,
+                                        content_type: "application/x-www-urlencoded"
                                        }))
+      puts "Reservation from ProctorU", json
       check_response_code_for_error(json["response_code"])
       reservation_info = json["data"]
     rescue RestClient::Exception => e
@@ -212,8 +212,8 @@ class ProctoruClient::Client < ProctoruClient::Base
       json = JSON.parse(RestClient.get(url,
                                        body.to_json,
                                        {
-                                         authorization: token,
-                                         content_type: "application/json"
+                                        authorization_token: config.token,
+                                        content_type: "application/x-www-urlencoded"
                                        }))
       check_response_code_for_error(json["response_code"])
       reservation_info = json["data"]
@@ -244,9 +244,10 @@ class ProctoruClient::Client < ProctoruClient::Base
       }
       json = JSON.parse(RestClient.get(url,
                                        {
-                                         authorization: token,
-                                         content_type: "application/json"
+                                        authorization_token: config.token,
+                                        content_type: "application/x-www-urlencoded"
                                        }))
+      puts "REPONSE from proctoru", json
       check_response_code_for_error(json["response_code"])
       json["data"]
     rescue RestClient::Exception => e
@@ -256,32 +257,52 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
 
-  # GET
-  # ENDPOINT NOTFOUND inside ta-web
-  def exams_for_course(course, page = 1)
+  def exams_for_institution(active = "Y")
     begin
       retries ||= 0
-      url = config.base_url + "/api/getInstitutionExamList"
-      body = {
-        all: 'Y'
-      }
+      url = config.base_url + "/api/getInstitutionExamList?all=#{active}"
       json = JSON.parse(RestClient.get(url,
-                                       body.to_json,
                                        {
-                                         authorization: token,
-                                         content_type: "application/json"
+                                        authorization_token: config.token,
+                                        content_type: "application/x-www-urlencoded"
                                        }))
+      puts "REPONSE from proctoru", json
+      check_response_code_for_error(json["response_code"])
+      json["data"]
+    rescue RestClient::Exception => e
+      logger("Exception #{e} -- #{e.response}")
+      json = JSON.parse(e.http_body)
+      raise ProctoruClient::Error.new(json["message"])
+    end
+  end
+
+  # Get
+  # ENDPOINT NOTFOUND inside ta-web
+  def exams_for_course(course)
+    begin
+      retries ||= 0
+      url = config.base_url + "/api/getInstitutionExamList?all=Y"
+      json = JSON.parse(RestClient.get(url,
+                                       {
+                                        authorization_token: config.token,
+                                        content_type: "application/x-www-urlencoded"
+                                       }))
+      puts "REPONSE from proctoru", json
       check_response_code_for_error(json["response_code"])
       exams_info = json["data"]
-      exams_info_by_course = exams_info.find { |exam| exam["courseno"] == course.id }
-      @pagination = {
-        current: 1,
-        total: exams_info_by_course.size,
-      }
-      @exams = exams_info_by_course.collect do |j|
-        {
-          exams: ProctoruClient::Appointment.from_proctoru_api(j)
+      if exams_info.present?
+        exams_info_by_course = exams_info.find { |exam| exam["courseno"] == course.id }
+        @pagination = {
+          current: 1,
+          total: exams_info_by_course.length,
         }
+        @exams = exams_info_by_course.collect do |j|
+          {
+            exams: ProctoruClient::Appointment.from_proctoru_api(j)
+          }
+        end
+      else
+        @exams = exams_info
       end
       @exams
     rescue RestClient::Exception => e
@@ -297,19 +318,19 @@ class ProctoruClient::Client < ProctoruClient::Base
     begin
       retries ||= 0
       url = config.base_url + "/api/getScheduleInfoAvailableTimesList"
-      body = {
+      params = {
         takeitnow: 'N',
         isadhoc: 'Y',
         reservation_no: transaction_id,
-        student_id: user.id, #Required if we query with reservation_no
-        start_date: Time.now
+        student_id: user.id, # Required if we query with reservation_no
+        start_date: Time.now.strftime('%Y-%m-%dT%H:%M:%S') # Ensure the date is in the correct format
       }
-      json = JSON.parse(RestClient.get(url,
-                                       body.to_json,
-                                       {
-                                         authorization: token,
-                                         content_type: "application/json"
-                                       }))
+      response = RestClient.get(url,
+                                {
+                                  params: params,
+                                  authorization_token: config.token,
+                                  content_type: "application/x-www-form-urlencoded"
+                                })
       check_response_code_for_error(json["response_code"])
       appt_info = json["data"]
 
@@ -331,18 +352,22 @@ class ProctoruClient::Client < ProctoruClient::Base
   def get_token
     raise ArgumentError.new("Please provide base_url") unless config.base_url
     raise ArgumentError.new("Please provide api_key") unless config.api_key
-    @token = config.api_key
+    @token = config.token
   end
 
   # GET
   def user_profile(user)
     begin
       retries ||= 0
-      url = config.base_url + "/api/getStudentProfile/#{user.id}"
+      url = config.base_url + "/api/getStudentProfile/"
+      params = {
+        student_id: user.id
+      }
       json = JSON.parse(RestClient.get(url,
                                        {
-                                         authorization: token,
-                                         content_type: "application/json",
+                                          params: params,
+                                          authorization_token: config.token,
+                                          content_type: "application/x-www-urlencoded"
                                        }))
       check_response_code_for_error(json["response_code"])
       ProctoruClient::User.from_proctoru_api(json["data"])
@@ -372,7 +397,6 @@ class ProctoruClient::Client < ProctoruClient::Base
 
   def check_response_code_for_error(code)
     code = code.to_i
-
     error, msg = code_in_error?(code)
     raise ProctoruClient::Error.new(msg, code) if error
   end
