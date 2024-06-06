@@ -17,8 +17,7 @@ class ProctoruClient::Client < ProctoruClient::Base
       retries ||= 0
       url = config.base_url + "/api/autoLogin"
       body = {
-        email: email,
-        time_sent: Time.current
+        email: email
       }
       json = JSON.parse(RestClient.post(url,
                                         body.to_json,
@@ -45,7 +44,6 @@ class ProctoruClient::Client < ProctoruClient::Base
                                        {
                                          authorization: token,
                                          content_type: "application/json"
-                                         time_sent: Time.current
                                        }))
       check_response_code_for_error(json["response_code"])
       json["data"]
@@ -63,7 +61,7 @@ class ProctoruClient::Client < ProctoruClient::Base
       retries ||= 0
       url = config.base_url + "/api/getScheduleInfoAvailableTimesList"
       body = {
-        time_sent: Time.now,
+        
         time_zone_id: time_zone_id,
         start_date: exam_date,
         student_id: user.id,
@@ -134,7 +132,6 @@ class ProctoruClient::Client < ProctoruClient::Base
       retries ||= 0
       url = config.base_url + "/api/moveReservation/"
       body = {
-        time_sent: Time.now
         reservation_no: transaction_id,
         start_date: exam.date,
         reservation_id: exam.id,
@@ -165,7 +162,6 @@ class ProctoruClient::Client < ProctoruClient::Base
       logger("Cancel Request: #{url.to_json}")
       body = {
         student_id: user.id, #Institution's unique test-taker ID
-        time_sent: Time.now,
         reservation_no: transaction_id,      
         url_return: "" #URL to redirect the test-taker to after scheduling
       }
@@ -177,7 +173,6 @@ class ProctoruClient::Client < ProctoruClient::Base
                                 }))
       check_response_code_for_error(json["response_code"])
       appt_info = json["data"]
-      #ProctoruClient::Appointment.from_examity_api(appt_info)
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
@@ -185,6 +180,23 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
   ##################### End AssessmentReservation ######################
+  def reservation(student_id)
+    begin
+      retries ||= 0
+      url = config.base_url + "/api/getStudentReservationList?student_id=#{student_id}"
+      json = JSON.parse(RestClient.get(url,
+                                       {
+                                         authorization: token,
+                                         content_type: "application/json"
+                                       }))
+      check_response_code_for_error(json["response_code"])
+      reservation_info = json["data"]
+    rescue RestClient::Exception => e
+      logger("Exception #{e} -- #{e.response}")
+      json = JSON.parse(e.http_body)
+      raise ProctoruClient::Error.new(json["message"])
+    end
+  end
 
   # POST
   # TODO this doesn't handle paging automatically
@@ -195,8 +207,7 @@ class ProctoruClient::Client < ProctoruClient::Base
       retries ||= 0
       url = config.base_url + "/api/getStudentReservationList"
       body = {
-        student_id: user.id,
-        time_sent: Time.current
+        student_id: user.id
       }
       json = JSON.parse(RestClient.get(url,
                                        body.to_json,
@@ -229,7 +240,6 @@ class ProctoruClient::Client < ProctoruClient::Base
       retries ||= 0
       url = config.base_url + "/api/getInstitutionTermList"
       body = {
-        time_sent: Time.current,
         all: active # Set to Y will only return active terms
       }
       json = JSON.parse(RestClient.get(url,
@@ -250,16 +260,11 @@ class ProctoruClient::Client < ProctoruClient::Base
   # ENDPOINT NOTFOUND inside ta-web
   def exams_for_course(course, page = 1)
     begin
-      current_term = terms_for_institution
-
       retries ||= 0
       url = config.base_url + "/api/getInstitutionExamList"
       body = {
-        time_sent: Time.current,
-        term_id: current_term["term_id"],
         all: 'Y'
       }
-
       json = JSON.parse(RestClient.get(url,
                                        body.to_json,
                                        {
@@ -267,7 +272,6 @@ class ProctoruClient::Client < ProctoruClient::Base
                                          content_type: "application/json"
                                        }))
       check_response_code_for_error(json["response_code"])
-      
       exams_info = json["data"]
       exams_info_by_course = exams_info.find { |exam| exam["courseno"] == course.id }
       @pagination = {
@@ -276,7 +280,6 @@ class ProctoruClient::Client < ProctoruClient::Base
       }
       @exams = exams_info_by_course.collect do |j|
         {
-          #user: ProctoruClient::User.from_examity_api(user_info),
           exams: ProctoruClient::Appointment.from_proctoru_api(j)
         }
       end
