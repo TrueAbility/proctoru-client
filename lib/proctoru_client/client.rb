@@ -297,7 +297,7 @@ class ProctoruClient::Client < ProctoruClient::Base
   # POST
   def get_token
     raise ArgumentError.new("Please provide base_url") unless config.base_url
-    raise ArgumentError.new("Please provide api_key") unless config.api_key
+    raise ArgumentError.new("Please provide api_key") unless config.token
     @token = config.token
   end
 
