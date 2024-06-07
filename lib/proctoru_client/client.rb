@@ -72,18 +72,19 @@ class ProctoruClient::Client < ProctoruClient::Base
   def examtimes(user, time_zone_id, exam_date)
     begin
       url = config.base_url + "/api/getScheduleInfoAvailableTimesList"
-      body = {
-        time_zone_id: time_zone_id,
+      params = {
+        time_zone_id: time_zone_id || "UTC",
         start_date: exam_date,
         student_id: user.id,
-        duration: 60,
-        takeitnow: 'Y'
+        duration: 1,
+        takeitnow: 'Y',
+        isadhoc: 'Y',
+        reservation_no: ''
       }
-      json = JSON.parse(RestClient.post(url,
-                                        body.to_json,
-                                        {
-                                          authorization_token: config.token,
-                                          content_type: "application/x-www-form-urlencoded"
+      json = JSON.parse(RestClient.get(url,
+                                        { 
+                                          params: params,
+                                          authorization_token: config.token
                                         }))
       check_response_code_for_error(json)
       json["data"]
@@ -114,9 +115,7 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
   
-  ##################### Start AssessmentReservation ######################
   # POST
-  
   def schedule(user, course, exam)
     begin
       url = config.base_url + "/api/addAdHocProcess/"
@@ -125,13 +124,13 @@ class ProctoruClient::Client < ProctoruClient::Base
         first_name: user.first_name,
         last_name: user.last_name,
         address1: user.try(:address).try(:street_address),
-        country: user.try(:address).try(:country_code),
+        country: user.try(:address).try(:country_code) || "JP",
         city: user.try(:address).try(:city),
         state: user.try(:address).try(:state),
         zipcode: user.try(:zipcode),
-        phone1: user.try(:phone_number),
+        phone1: user.try(:phone_number) || "123456",
         email: user.email,
-        time_zone_id: exam.time_zone,
+        time_zone_id: exam.time_zone || "UTC",
         description: exam.name,
         duration: exam.duration_in_minutes,
         start_date: exam.date,
@@ -141,7 +140,9 @@ class ProctoruClient::Client < ProctoruClient::Base
         notes: exam.instructions,
         takeitnow: 'N',
         notify: 'Y',
-        preset: exam_preset_by_level(exam.level)
+        preset: exam_preset_by_level(exam.level),
+        courseno: course.name,
+        course_id: course.id
       }
       encoded_body = URI.encode_www_form(body)
       logger("Schedule Request: #{encoded_body}")
@@ -160,7 +161,6 @@ class ProctoruClient::Client < ProctoruClient::Base
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
-      puts json
       raise ProctoruClient::Error.new(json["message"], json["response_code"])
     end
   end
@@ -185,7 +185,7 @@ class ProctoruClient::Client < ProctoruClient::Base
                                        }))
       check_response_code_for_error(json)
       appt_info = json["data"]
-      appt_info["status"] = "scheduled"  
+      appt_info["status"] = "rescheduled"  
       ProctoruClient::Appointment.from_proctoru_api(appt_info)
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
@@ -204,7 +204,6 @@ class ProctoruClient::Client < ProctoruClient::Base
         reservation_no: transaction_id,      
         url_return: "" #URL to redirect the test-taker to after scheduling
       }
-      logger("Cancel Request: #{body.to_json}")
       encoded_body = URI.encode_www_form(body)
       json = JSON.parse(RestClient.post(url,
                                         encoded_body,
@@ -214,34 +213,25 @@ class ProctoruClient::Client < ProctoruClient::Base
                                         }))
       check_response_code_for_error(json)
       appt_info = json["data"]
+      appt_info["status"] = "canceled"  
+      ProctoruClient::Appointment.from_proctoru_api(appt_info)
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
       raise ProctoruClient::Error.new(json["message"], json["response_code"])
     end
   end
-  ##################### End AssessmentReservation ######################
   
   # POST
   # TODO ProctorU does not support pagination 
   def exams_for_user(course, user, page = 1)
     begin
-      url = config.base_url + "/api/getStudentReservationList/?student_id=#{user.id}"
-      json = JSON.parse(RestClient.get(url,
-                                       {
-                                        authorization_token: config.token,
-                                       }))
-      check_response_code_for_error(json)
-      reservation_info = json["data"]
-      exams_info = reservation_info
+      @exams = reservations_for_user(user.id)
       @pagination = {
         current: 1,
-        total: exams_info.count,
+        total: @exams.count,
       }
       @user = user_profile(user)
-      @exams = exams_info.collect do |j|
-        ProctoruClient::Appointment.from_proctoru_api(j)
-      end
       return {user: @user, exams: @exams, pagination: @pagination}
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
@@ -314,9 +304,13 @@ class ProctoruClient::Client < ProctoruClient::Base
   # GET
   def user_profile(user)
     begin
-      url = config.base_url + "/api/getStudentProfile/?student_id=#{user.id}"
+      url = config.base_url + "/api/getStudentProfile/"
+      params = {
+        student_id: user.id
+      }
       json = JSON.parse(RestClient.get(url,
                                        {
+                                        params: params,
                                         authorization_token: config.token
                                        }))
       check_response_code_for_error(json)
@@ -346,9 +340,13 @@ class ProctoruClient::Client < ProctoruClient::Base
 
   def reservations_for_user(student_id)
     begin
-      url = config.base_url + "/api/getStudentReservationList?student_id=#{student_id}"
+      url = config.base_url + "/api/getStudentReservationList"
+      params = {
+        student_id: student_id
+      }
       json = JSON.parse(RestClient.get(url,
                                        {
+                                        params: params,
                                         authorization_token: config.token
                                        }))
       check_response_code_for_error(json)
@@ -357,6 +355,25 @@ class ProctoruClient::Client < ProctoruClient::Base
         ProctoruClient::Appointment.from_proctoru_api(j)
       end
       @reservations
+    rescue RestClient::Exception => e
+      logger("Exception #{e} -- #{e.response}")
+      json = JSON.parse(e.http_body)
+      raise ProctoruClient::Error.new(json["message"])
+    end
+  end
+
+  def reservation_status(transaction_id)
+    begin
+      url = config.base_url + "/api/getIsReservationAuthenticated"
+      params = {
+        reservation_no: transaction_id
+      }
+      json = JSON.parse(RestClient.get(url,
+                                      {
+                                        params: params,
+                                        authorization_token: config.token
+                                      }))
+      check_response_code_for_error(json)
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
@@ -382,6 +399,11 @@ class ProctoruClient::Client < ProctoruClient::Base
   end
 
   def check_response_code_for_error(response)
+    # puts "#" * 80
+    # puts "PROCTORU REPONSE :"
+    # puts "#" * 80
+    # p response
+    # puts "#" * 80
     code = response["response_code"].to_i
     error, msg = code_in_error?(code)
     raise ProctoruClient::Error.new(response["message"], code) if error
