@@ -16,7 +16,6 @@ class ProctoruClient::Client < ProctoruClient::Base
     begin
       url = sso_login(email)
       uri = URI.parse(url)
-      # Extract the token parameter
       query_params = URI.decode_www_form(uri.query || "")
       token_param = query_params.assoc("token")
       if token_param
@@ -35,8 +34,9 @@ class ProctoruClient::Client < ProctoruClient::Base
       body = {
         email: email
       }
+      encoded_body = URI.encode_www_form(body)
       json = JSON.parse(RestClient.post(url,
-                                        body.to_json,
+                                        encoded_body,
                                         {
                                           authorization_token: config.token,
                                           content_type: "application/x-www-form-urlencoded"
