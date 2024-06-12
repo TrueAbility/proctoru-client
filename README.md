@@ -1,6 +1,6 @@
 # ProctoruClient
 
-Wrapper around the Examity scheduling API. This is a private gem. A local test server for the API is included, run this with
+Wrapper around the ProctorU scheduling API. This is a private gem. A local test server for the API is included, run this with
 
 ```
 puma -v -p 4567 config.ru
@@ -10,7 +10,7 @@ Example usage of TestApiServer:
 
 ```
 curl -X POST -d  '{"clientId": "1", "secretKey": "2"}' \
-  -H "Content-Type: application/json" http://localhost:4567/examity/api/token
+  -H "Content-Type: application/json" http://localhost:4567/api/token
 ```
 
 Usage of the client:
@@ -48,4 +48,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/trueability/proctoru_clientr.
+Bug reports and pull requests are welcome on GitHub at https://github.com/Trueability/proctoru_client.
