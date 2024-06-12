@@ -14,6 +14,23 @@ class ProctoruClient::Client < ProctoruClient::Base
   # sso token
   def sso_token(email)
     begin
+      url = sso_login(email)
+      uri = URI.parse(url)
+      # Extract the token parameter
+      query_params = URI.decode_www_form(uri.query || "")
+      token_param = query_params.assoc("token")
+      if token_param
+        token = token_param.last
+      else
+        raise ProctoruClient::Error.new("Something went wrong")
+      end
+    rescue RestClient::Exception => e
+      raise ProctoruClient::Error.new("Something went wrong")
+    end
+  end
+
+  def sso_login(email)
+    begin
       url = config.base_url + "/api/autoLogin"
       body = {
         email: email
@@ -25,7 +42,7 @@ class ProctoruClient::Client < ProctoruClient::Base
                                           content_type: "application/x-www-form-urlencoded"
                                         }))
       check_response_code_for_error(json)
-      json["data"]
+      json["data"]["url"]
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
@@ -70,6 +87,9 @@ class ProctoruClient::Client < ProctoruClient::Base
 
   # POST 
   # ENDPOINT NOTFOUND inside ta-web
+  # Returns a list of the available times, as well as a list of times for a specific exam. 
+  # 1. with an exam or test-taker (isadhoc: 'N', required: [exam_id, student_id])
+  # 2. without an exam or test-taker. (isadhoc: 'Y')
   def examtimes(user, time_zone_id, exam_date)
     begin
       url = config.base_url + "/api/getScheduleInfoAvailableTimesList"
@@ -117,6 +137,7 @@ class ProctoruClient::Client < ProctoruClient::Base
   end
   
   # POST
+  # Reserves a time for a test-taker to take an exam 
   def schedule(user, course, exam)
     begin
       url = config.base_url + "/api/addAdHocProcess"
@@ -165,6 +186,7 @@ class ProctoruClient::Client < ProctoruClient::Base
   end
 
   # POST
+  # Moves an existing reservation from a past date to a future date if the reservation was not used
   def reschedule(transaction_id, course, exam)
     begin
       url = config.base_url + "/api/moveReservation"
@@ -194,6 +216,7 @@ class ProctoruClient::Client < ProctoruClient::Base
   end
 
   # POST
+  # Removes a reservation from the schedule
   def cancel(transaction_id, user_id)
     begin
       url = config.base_url + "/api/removeReservation"
@@ -246,7 +269,8 @@ class ProctoruClient::Client < ProctoruClient::Base
   def exams_for_course(course, page = 1)
     begin
       # FIXME
-      # Here retrive active exams in ProcotorU
+      # Returns a list of exams, including multiple details about the exam, for an institution.
+      # Note: this does not support exams (single person exam) created via addAdHocProcess flow 
       url = config.base_url + "/api/getInstitutionExamList?all=F"
       json = JSON.parse(RestClient.get(url,
                                        {
@@ -305,6 +329,7 @@ class ProctoruClient::Client < ProctoruClient::Base
   end
 
   # GET
+  # Returns a test-taker's profile
   def user_profile(user)
     begin
       url = config.base_url + "/api/getStudentProfile/"
@@ -341,6 +366,8 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
 
+  # Get
+  # Returns the list of active reservations for a single test-taker
   def reservations_for_user(student_id)
     begin
       url = config.base_url + "/api/getStudentReservationList"
@@ -365,6 +392,9 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
 
+  # GET
+  # Returns the status of the authenticate flag for an individual reservation.
+  # Note: this does not support reservation made via addAdhocProcess flow
   def reservation_status(transaction_id)
     begin
       url = config.base_url + "/api/getIsReservationAuthenticated"
