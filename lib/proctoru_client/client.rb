@@ -150,7 +150,7 @@ class ProctoruClient::Client < ProctoruClient::Base
         city: user.address.city,
         state: user.state,
         zipcode: user.zipcode,
-        phone1: user.phoneNumber,
+        phone1: user.phone_number,
         email: user.email,
         time_zone_id: exam.time_zone || "UTC",
         description: exam.name,

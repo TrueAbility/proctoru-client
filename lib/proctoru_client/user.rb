@@ -3,20 +3,9 @@ class ProctoruClient::User
                 :first_name,
                 :id,
                 :last_name,
-                :phoneNumber,
+                :phone_number,
                 :profile_completed,
                 :time_zone
-
-  def self.from_examity_api(json)
-    ProctoruClient::User.new(id: json["userId"],
-             first_name: json["firstName"],
-             last_name: json["lastName"],
-             email: json["emailAddress"],
-             phone_number: json["phoneNumber"],
-             profile_completed: json["profile_completed"],
-             time_zone: json["timezone"]
-            )
-  end
 
   def self.from_proctoru_api(json)
     ProctoruClient::User.new(id: json["student_id"],
@@ -31,7 +20,6 @@ class ProctoruClient::User
 
   def initialize(opts = {})
     opts.symbolize_keys!
-
     @id = opts[:id]
     @first_name = opts[:first_name]
     @last_name = opts[:last_name]
@@ -39,7 +27,6 @@ class ProctoruClient::User
     @phone_number = opts[:phone_number]
     @profile_completed = opts[:profile_completed]
     @time_zone = opts[:time_zone]
-
     self
   end
 
