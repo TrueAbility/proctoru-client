@@ -118,17 +118,13 @@ class ProctoruClient::Client < ProctoruClient::Base
   # POST
   def schedule(user, course, exam)
     begin
-      url = config.base_url + "/api/addAdHocProcess/"
+      url = config.base_url + "/api/addAdHocProcess"
       body = {
         student_id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
-        address1: user.try(:address).try(:street_address),
-        country: user.try(:address).try(:country_code) || "JP",
-        city: user.try(:address).try(:city),
-        state: user.try(:address).try(:state),
-        zipcode: user.try(:zipcode),
-        phone1: user.try(:phone_number) || "123456",
+        country: user.respond_to?(:address) ? user.address&.country_code || "JP" : "JP",
+        phone1: user.phoneNumber || "123456",
         email: user.email,
         time_zone_id: exam.time_zone || "UTC",
         description: exam.name,
@@ -145,7 +141,6 @@ class ProctoruClient::Client < ProctoruClient::Base
         course_id: course.id
       }
       encoded_body = URI.encode_www_form(body)
-      logger("Schedule Request: #{encoded_body}")
       json = JSON.parse(RestClient.post(url,
                                         encoded_body,
                                         {
@@ -168,7 +163,7 @@ class ProctoruClient::Client < ProctoruClient::Base
   # POST
   def reschedule(transaction_id, course, exam)
     begin
-      url = config.base_url + "/api/moveReservation/"
+      url = config.base_url + "/api/moveReservation"
       body = {
         reservation_no: transaction_id,
         reservation_id: exam.id,
@@ -274,7 +269,7 @@ class ProctoruClient::Client < ProctoruClient::Base
   end
 
   # GET
-  # TODO ProtorU do not support retrieve exam/reservation_info by resverstion_id
+  # TODO ProctorU does not support retrieving exam/reservation by resveration_id. 
   # We can only get aviable timeslot in API currently
   def exam(transaction_id, user)
     begin
@@ -297,7 +292,7 @@ class ProctoruClient::Client < ProctoruClient::Base
   # POST
   def get_token
     raise ArgumentError.new("Please provide base_url") unless config.base_url
-    raise ArgumentError.new("Please provide api_key") unless config.token
+    raise ArgumentError.new("Please provide token") unless config.token
     @token = config.token
   end
 

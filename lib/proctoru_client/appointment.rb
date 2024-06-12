@@ -73,7 +73,7 @@ class ProctoruClient::Appointment
     @username = opts[:username]
     @flags = []
 
-    if opts[:flags].present?
+    if opts.dig(:flags) && opts[:flags].present?
       @flags =
         opts[:flags].collect do |flag|
           flag_options = flag

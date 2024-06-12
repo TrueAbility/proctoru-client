@@ -14,9 +14,9 @@ class ProctoruClient::UserTest < Minitest::Test
     Capybara::Discoball.spin(ProctoruClient::TestApiServer) do |server|
       config = ProctoruClient::Configuration.new(
         base_url: server.url,
+        token: "secret_token",
         client_id: "my client id",
         secret_key: "my secret")
-
       client = ProctoruClient::Client.new(config)
       token = client.get_token
       assert_equal "secret_token", token

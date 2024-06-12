@@ -9,6 +9,7 @@ class ProctoruClient::TimezoneTest < Minitest::Test
     Capybara::Discoball.spin(ProctoruClient::TestApiServer) do |server|
       config = ProctoruClient::Configuration.new(
         base_url: server.url,
+        token: "secret_token",
         client_id: "my client id",
         secret_key: "my secret")
 

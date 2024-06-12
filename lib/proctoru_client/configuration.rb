@@ -8,7 +8,7 @@ class ProctoruClient::Configuration
     # @encryption_key = opts[:encryption_key]
     @base_url = opts[:base_url]
     @login_url = opts[:login_url]
-    @token = opts[:api_key]
+    @token = opts[:token]
     self
   end
 end

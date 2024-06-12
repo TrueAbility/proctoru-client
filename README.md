@@ -16,7 +16,7 @@ curl -X POST -d  '{"clientId": "1", "secretKey": "2"}' \
 Usage of the client:
 ```ruby
 client = ProctoruClient::Client.new do
-  api_key = "your api key"
+  token = "your api key"
 end
 
 
