@@ -34,13 +34,13 @@ class ProctoruClient::Client < ProctoruClient::Base
   end
 
   # GET
-  # ENDPOINT NOTFOUND inside ta-web
   def timezones
     begin
       url = config.base_url + "/api/getTimeZoneList"
       json = JSON.parse(RestClient.get(url,
                                        {
-                                          authorization_token: config.token
+                                          authorization_token: config.token,
+                                          content_type: "application/x-www-form-urlencoded"
                                        }))
       check_response_code_for_error(json)
       json["data"]
@@ -51,12 +51,13 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
 
-  def find_timezones
+  def find_timezones(time_zone)
     begin
       url = config.base_url + "/api/getTimeZoneList"
       json = JSON.parse(RestClient.get(url,
                                        {
-                                          authorization_token: config.token
+                                          authorization_token: config.token,
+                                          content_type: "application/x-www-form-urlencoded"
                                        }))
       check_response_code_for_error(json)
       json["data"]
@@ -123,8 +124,12 @@ class ProctoruClient::Client < ProctoruClient::Base
         student_id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
-        country: user.respond_to?(:address) ? user.address&.country_code || "JP" : "JP",
-        phone1: user.phoneNumber || "123456",
+        address1: user.address.street_address,
+        country: user.address.country_code,
+        city: user.address.city,
+        state: user.state,
+        zipcode: user.zipcode,
+        phone1: user.phoneNumber,
         email: user.email,
         time_zone_id: exam.time_zone || "UTC",
         description: exam.name,
@@ -138,7 +143,8 @@ class ProctoruClient::Client < ProctoruClient::Base
         notify: 'Y',
         preset: exam_preset_by_level(exam.level),
         courseno: course.name,
-        course_id: course.id
+        course_id: course.id,
+        url_return: "" #URL to redirect the test-taker to after scheduling
       }
       encoded_body = URI.encode_www_form(body)
       json = JSON.parse(RestClient.post(url,
@@ -147,11 +153,9 @@ class ProctoruClient::Client < ProctoruClient::Base
                                           authorization_token: config.token,
                                           content_type: "application/x-www-form-urlencoded"
                                         }))
-
       check_response_code_for_error(json)
       appt_info = json["data"]
       appt_info["status"] = "scheduled"  
-
       ProctoruClient::Appointment.from_proctoru_api(appt_info)
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
@@ -237,8 +241,12 @@ class ProctoruClient::Client < ProctoruClient::Base
 
   # Get
   # ENDPOINT NOTFOUND inside ta-web
+  # Since we are creating exam via addAdHocProcess endpoint, we cannot specify course for each exam.
+  # Proctoru does not support getting exams via course
   def exams_for_course(course, page = 1)
     begin
+      # FIXME
+      # Here retrive active exams in ProcotorU
       url = config.base_url + "/api/getInstitutionExamList?all=F"
       json = JSON.parse(RestClient.get(url,
                                        {
@@ -270,7 +278,7 @@ class ProctoruClient::Client < ProctoruClient::Base
 
   # GET
   # TODO ProctorU does not support retrieving exam/reservation by resveration_id. 
-  # We can only get aviable timeslot in API currently
+  # We can only get avilable timeslots in API by reservation_id currently
   def exam(transaction_id, user)
     begin
       reservations = reservations_for_user(user.id)
@@ -389,7 +397,6 @@ class ProctoruClient::Client < ProctoruClient::Base
         @logger.warn "No rails logger, using standalone"
       end
     end
-    
     @logger.warn("ProctoruClient: #{message}")
   end
 
