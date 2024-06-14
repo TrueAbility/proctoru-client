@@ -145,9 +145,9 @@ class ProctoruClient::Client < ProctoruClient::Base
         student_id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
-        address1: user.address.street_address,
-        country: user.address.country_code,
-        city: user.address.city,
+        address1: user.address,
+        country: user.country,
+        city: user.city,
         state: user.state,
         zipcode: user.zipcode,
         phone1: user.phone_number,
@@ -217,12 +217,12 @@ class ProctoruClient::Client < ProctoruClient::Base
 
   # POST
   # Removes a reservation from the schedule
-  def cancel(transaction_id, user_id)
+  def cancel(transaction_id, student_id)
     begin
       url = config.base_url + "/api/removeReservation"
       logger("Cancel Request: #{url.to_json}")
       body = {
-        student_id: user_id, 
+        student_id: student_id, # Student id was set to email
         reservation_no: transaction_id,      
         url_return: "" #URL to redirect the test-taker to after scheduling
       }
@@ -253,7 +253,7 @@ class ProctoruClient::Client < ProctoruClient::Base
         current: 1,
         total: @exams.count,
       }
-      @user = user_profile(user)
+      @user = user_profile(user.id)
       return {user: @user, exams: @exams, pagination: @pagination}
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
@@ -303,9 +303,9 @@ class ProctoruClient::Client < ProctoruClient::Base
   # GET
   # TODO ProctorU does not support retrieving exam/reservation by resveration_id. 
   # We can only get avilable timeslots in API by reservation_id currently
-  def exam(transaction_id, user)
+  def exam(transaction_id, student_id)
     begin
-      reservations = reservations_for_user(user.id)
+      reservations = reservations_for_user(student_id)
       appt_info = unless reservations.empty?
         reservations.find { |reservation| reservation.id == transaction_id }
       end
@@ -330,11 +330,11 @@ class ProctoruClient::Client < ProctoruClient::Base
 
   # GET
   # Returns a test-taker's profile
-  def user_profile(user)
+  def user_profile(student_id)
     begin
       url = config.base_url + "/api/getStudentProfile/"
       params = {
-        student_id: user.id
+        student_id: student_id
       }
       json = JSON.parse(RestClient.get(url,
                                        {
