@@ -179,10 +179,22 @@ class ProctoruClient::Client < ProctoruClient::Base
       appt_info["status"] = "scheduled"  
       ProctoruClient::Appointment.from_proctoru_api(appt_info)
     rescue RestClient::Exception => e
+      if json_data["message"].start_with?("reservation_id_EXIST_FOR_THIS_INSTITUTION")
+        appt_info = get_user_reservation_info(user_id, reservation_id)
+        if appt_info.present?
+          return ProctoruClient::Appointment.from_proctoru_api(appt_info)
+        end
+      end
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
       raise ProctoruClient::Error.new(json["message"], json["response_code"])
     end
+  end
+
+  def get_user_reservation_info(user_id, reservation_id)
+    @reservations = reservations_for_user(user_id)
+    reservation_found = @reservations.find { |reservation| reservation["reservation_no"] == reservation_id }
+    reservation_found
   end
 
   # POST
@@ -309,13 +321,13 @@ class ProctoruClient::Client < ProctoruClient::Base
       appt_info = unless reservations.empty?
         reservations.find { |reservation| reservation.id == transaction_id }
       end
-      user_info = user_profile(user)
+      user_info = user_profile(student_id)
       return {
         user: user_info,
         appointment: appt_info
       }
     rescue RestClient::Exception => e
-      logger("Exception #{e} -- #{e.response}")
+      logger("Exception FROM PROCTORRU#{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
       raise ProctoruClient::Error.new(json["message"])
     end

@@ -11,6 +11,7 @@ class ProctoruClient::User
                 :city,
                 :state,
                 :zipcode
+                
   def self.from_proctoru_api(json)
     ProctoruClient::User.new(id: json["student_id"],
              first_name: json["first_name"],
@@ -18,7 +19,7 @@ class ProctoruClient::User
              email: json["email"],
              phone_number: json["phone1"],
              profile_completed: json["profilecomplete"],
-             time_zone: json["time_zone_id"]
+             time_zone: json["time_zone_id"],
              address: json["address"],
              country: json["country"],
              city: json["city"],
