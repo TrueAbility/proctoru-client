@@ -167,6 +167,7 @@ class ProctoruClient::Client < ProctoruClient::Base
         course_id: course.id,
         url_return: "" #URL to redirect the test-taker to after scheduling
       }
+      logger("Schedule Request: #{body.to_json}")
       encoded_body = URI.encode_www_form(body)
       json = JSON.parse(RestClient.post(url,
                                         encoded_body,
@@ -191,9 +192,9 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
 
-  def get_user_reservation_info(user_id, reservation_id)
+  def get_user_reservation_info(user_id, reservation_no)
     @reservations = reservations_for_user(user_id)
-    reservation_found = @reservations.find { |reservation| reservation["reservation_no"] == reservation_id }
+    reservation_found = @reservations.find { |reservation| reservation["reservation_no"] == reservation_no }
     reservation_found
   end
 
@@ -317,9 +318,9 @@ class ProctoruClient::Client < ProctoruClient::Base
   # We can only get avilable timeslots in API by reservation_id currently
   def exam(transaction_id, student_id)
     begin
-      reservations = reservations_for_user(student_id)
+      reservations = reservations_for_user(student_id)      
       appt_info = unless reservations.empty?
-        reservations.find { |reservation| reservation.id == transaction_id }
+        reservations.find { |reservation| reservation.reservation_no == transaction_id }
       end
       user_info = user_profile(student_id)
       return {

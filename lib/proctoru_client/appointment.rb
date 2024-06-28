@@ -23,7 +23,7 @@ class ProctoruClient::Appointment
               course_id: json["courseno"],
               course_name: json["course_name"],
               exam_id: json["exam_id"],
-              exam_name: json["exam_name"],
+              exam_name: json["exam_name"] || json["test"],
               duration_in_minutes: json["duration_in_minutes"],
               password: json["exam_password"],
               username: json["exam_serName"],
