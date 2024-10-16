@@ -32,7 +32,8 @@ class ProctoruClient::Client < ProctoruClient::Base
     begin
       url = config.base_url + "/api/autoLogin"
       body = {
-        email: email
+        email: email,
+        update: 'N'
       }
       encoded_body = URI.encode_www_form(body)
       json = JSON.parse(RestClient.post(url,
