@@ -28,10 +28,11 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
 
-  def sso_login(email)
+  def sso_login(email, user_id)
     begin
       url = config.base_url + "/api/autoLogin"
       body = {
+        student_id: user_id,
         email: email,
         update: 'N'
       }
@@ -166,6 +167,7 @@ class ProctoruClient::Client < ProctoruClient::Base
         preset: exam_preset_by_level(exam.level),
         courseno: course.name,
         course_id: course.id,
+        update: 'Y',
         url_return: "" #URL to redirect the test-taker to after scheduling
       }
       logger("Schedule Request: #{body.to_json}")
