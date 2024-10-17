@@ -25,9 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "sinatra"
   spec.add_development_dependency "capybara_discoball"
-  spec.add_development_dependency "rack"
-  spec.add_development_dependency "rackup"
-  spec.add_development_dependency "activesupport"
   spec.add_dependency "awesome_print"
   spec.add_dependency "rest-client"
 end
