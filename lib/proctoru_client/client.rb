@@ -88,26 +88,28 @@ class ProctoruClient::Client < ProctoruClient::Base
   end
 
   # POST 
-  # ENDPOINT NOTFOUND inside ta-web
   # Returns a list of the available times, as well as a list of times for a specific exam. 
   # 1. with an exam or test-taker (isadhoc: 'N', required: [exam_id, student_id])
   # 2. without an exam or test-taker. (isadhoc: 'Y')
-  def examtimes(user, time_zone_id, exam_date)
+  def examtimes(time_zone_id, exam_date, user = nil, duration = 60, transaction_id = nil)
     begin
       url = config.base_url + "/api/getScheduleInfoAvailableTimesList"
       params = {
         time_zone_id: time_zone_id || "UTC",
         start_date: exam_date,
-        student_id: user.id,
-        duration: 1,
+        duration: duration,
         takeitnow: 'Y',
-        isadhoc: 'Y',
-        reservation_no: ''
+        isadhoc: user.nil? ? 'Y' : 'N'
       }
+      if !user.nil?
+        params[:student_id] = user.id
+        params[:reservation_no] = transaction_id if transaction_id
+      end
       json = JSON.parse(RestClient.get(url,
                                         { 
                                           params: params,
-                                          authorization_token: config.token
+                                          authorization_token: config.token,
+                                          content_type: "application/x-www-form-urlencoded"
                                         }))
       check_response_code_for_error(json)
       json["data"]
@@ -354,8 +356,8 @@ class ProctoruClient::Client < ProctoruClient::Base
       }
       json = JSON.parse(RestClient.get(url,
                                        {
-                                        params: params,
-                                        authorization_token: config.token
+                                          params: params,
+                                          authorization_token: config.token
                                        }))
       check_response_code_for_error(json)
       ProctoruClient::User.from_proctoru_api(json["data"])
