@@ -120,6 +120,31 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
 
+  def available_times(start_date:, time_zone_id:, duration: 60)
+    begin
+      url = config.base_url + "/api/getScheduleInfoAvailableTimesList"
+      params = {
+        time_zone_id: time_zone_id || "UTC",
+        start_date: start_date,
+        duration: duration,
+        takeitnow: 'Y',
+        isadhoc: 'Y'
+      }
+      json = JSON.parse(RestClient.get(url,
+                                        { 
+                                          params: params,
+                                          authorization_token: config.token,
+                                          content_type: "application/x-www-form-urlencoded"
+                                        }))
+      check_response_code_for_error(json)
+      json["data"]
+    rescue RestClient::Exception => e
+      logger("Exception #{e} -- #{e.response}")
+      json = JSON.parse(e.http_body)
+      raise ProctoruClient::Error.new(json["message"])
+    end
+  end
+
   def exam_preset_by_level(level)
     # Enter the Exam Level value as 1,2,3,4 or 5.
     # 1 for Live Authentication (LevelLA),
