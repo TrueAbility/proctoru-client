@@ -195,6 +195,7 @@ class ProctoruClient::Client < ProctoruClient::Base
         courseno: course.name,
         course_id: course.id,
         update: 'Y',
+        active: 'T',
         url_return: "" #URL to redirect the test-taker to after scheduling
       }
       logger("Schedule Request: #{body.to_json}")

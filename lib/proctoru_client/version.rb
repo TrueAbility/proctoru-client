@@ -1,3 +1,3 @@
 module ProctoruClient
-  VERSION = "0.1.2"
+  VERSION = "0.1.2.1"
 end
