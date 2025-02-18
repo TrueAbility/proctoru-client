@@ -1,7 +1,7 @@
 class ProctoruClient::Exam
   attr_accessor :id, :name, :url, :duration_in_minutes, :password, :username, :time_zone,
                 :date, :instructions, :level, :transaction_id, :course_id, :course_name,
-                :flags
+                :flags, :department_id
 
   def initialize(opts = {})
     opts.symbolize_keys!
@@ -16,6 +16,7 @@ class ProctoruClient::Exam
     @date = opts[:date]
     @instructions = opts[:instructions]
     @level = opts[:level]
+    @department_id = opts[:department_id]
   end
 
   def to_s
