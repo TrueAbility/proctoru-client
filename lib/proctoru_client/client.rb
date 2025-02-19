@@ -28,14 +28,17 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
 
-  def sso_login(email, user_id)
+  def sso_login(email, user_id, time_zone = nil)
     begin
       url = config.base_url + "/api/autoLogin"
       body = {
         student_id: user_id,
         email: email,
-        update: 'N'
+        update: time_zone.nil? ? 'N' : 'Y'
       }
+      if !time_zone.nil?
+        body[:time_zone_id] = find_timezones(time_zone)
+      end
       encoded_body = URI.encode_www_form(body)
       json = JSON.parse(RestClient.post(url,
                                         encoded_body,
@@ -70,16 +73,15 @@ class ProctoruClient::Client < ProctoruClient::Base
     end
   end
 
-  def find_timezones(time_zone)
+  def find_timezones(iana_timezone)
     begin
-      url = config.base_url + "/api/getTimeZoneList"
-      json = JSON.parse(RestClient.get(url,
-                                       {
-                                          authorization_token: config.token,
-                                          content_type: "application/x-www-form-urlencoded"
-                                       }))
-      check_response_code_for_error(json)
-      json["data"]
+      get_timezones = timezones
+      if get_timezones
+        timezone = get_timezones.find { |tz| tz["Description"] == iana_timezone }
+        timezone&.fetch("Id")
+      else
+        "UTC"
+      end
     rescue RestClient::Exception => e
       logger("Exception #{e} -- #{e.response}")
       json = JSON.parse(e.http_body)
@@ -194,9 +196,10 @@ class ProctoruClient::Client < ProctoruClient::Base
         preset: exam_preset_by_level(exam.level),
         courseno: course.name,
         course_id: course.id,
+        department_id: exam.department_id,
         update: 'Y',
         active: 'T',
-        url_return: "" #URL to redirect the test-taker to after scheduling
+        url_return: "" #URL to redirect the test-taker to after scheduling,
       }
       logger("Schedule Request: #{body.to_json}")
       encoded_body = URI.encode_www_form(body)
@@ -346,7 +349,7 @@ class ProctoruClient::Client < ProctoruClient::Base
 
   # GET
   # TODO ProctorU does not support retrieving exam/reservation by resveration_id. 
-  # We can only get avilable timeslots in API by reservation_id currently
+  # We can only get available timeslots in API by reservation_id currently
   def exam(transaction_id, student_id)
     begin
       reservations = reservations_for_user(student_id)      
